@@ -56,6 +56,10 @@ elif (twitter is None): # when tweets are empty
     fig_scat.update_layout(xaxis_rangeslider_visible=False)
     # Show plot(s)
     st.plotly_chart(fig_scat)
+    show_bit = st.selectbox('Show Original Bitcoin Data?', ('No','Yes'))
+    if show_bit == "Yes":
+        num_bit = st.slider('Number of Rows:', min_value=10, max_value=len(bitcoin.index))
+        st.table(bitcoin[['date','high','low','open','close','Volume USD']].iloc[:num_bit].set_index('date').sort_values(by='date',axis=0,ascending=False))
 else: # both not None
     # Show bitcoin data
     color = st.color_picker('Choose a Color for Line Plot:', '#00f5f9')
@@ -71,6 +75,11 @@ else: # both not None
     fig_scat.update_layout(xaxis_rangeslider_visible=False)
     # Show plot(s)
     st.plotly_chart(fig_scat)
+    show_bit = st.selectbox('Show Original Bitcoin Data?', ('No','Yes'))
+    if show_bit == "Yes":
+        num_bit = st.slider('Number of Rows:', min_value=10, max_value=len(bitcoin.index))
+        st.table(bitcoin[['date','high','low','open','close','Volume USD']].iloc[:num_bit].set_index('date').sort_values(by='date',axis=0,ascending=False))
+        
     # Show twitter data
     st.subheader(f'**Sentiment Scores in Tweets**')
     fig_t = px.bar(twitter, x='date', y="sentiment_score", color='sentiment_score')
@@ -82,7 +91,7 @@ else: # both not None
 
 # Querying data
 def get_df(name,**kwargs):
-    url = "https://dsci-551-project-9f773-default-rtdb.firebaseio.com/%s/.json" % name
+    url = st.secrets['db_url'] % name
     payload = {'orderBy':'"unix"'}
     for key, value in kwargs.items():
         payload[key] = value
