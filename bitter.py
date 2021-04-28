@@ -84,9 +84,9 @@ elif (twitter is None): # when tweets are empty
         st.table(bitcoin[['date','high','low','open','close','Volume USD']].iloc[:num_bit].set_index('date').sort_values(by='date',axis=0,ascending=False))
 else: # both not None
     # Show bitcoin data
-    color = st.color_picker('Choose a Color for Line Plot:', '#00f5f9')
+    # color = st.color_picker('Choose a Color for Line Plot:', '#00f5f9')
     st.subheader(f'**Bitcoin Price Between {datetime.combine(start_date,start_time).strftime("%#m/%d/%y %H:%M")} and {datetime.combine(end_date,end_time).strftime("%#m/%d/%y %H:%M")}**')
-    fig_scat = go.Figure([go.Scatter(name='Line Chart',x=bitcoin['date'], y=bitcoin['high'],line=dict(color=color, width=2))])
+    fig_scat = go.Figure([go.Scatter(name='Line Chart',x=bitcoin['date'], y=bitcoin['high'],line=dict(color='#00f5f9', width=2))])
     # Show candle plot on top
     candle = st.checkbox('Show CandleStick Chart')
     if candle:
