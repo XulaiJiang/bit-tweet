@@ -8,6 +8,28 @@ from dateutil.tz import tzutc
 import plotly.graph_objects as go
 import plotly.express as px
 
+# Querying data
+def get_df(name,**kwargs):
+    url = st.secrets['db_url'] % name
+    payload = {'orderBy':'"unix"'}
+    for key, value in kwargs.items():
+        payload[key] = value
+    js = requests.get(url,params=payload).json()
+    if js: # when data is not null
+        if isinstance(js, dict): # when result is dict 
+            df = pd.DataFrame(list(js.values())) 
+        elif isinstance(js, list): # when result is list
+            df = pd.DataFrame(js)
+        df['date'] = df['unix'].apply(unix2datetime)
+        df = df.sort_values(by=['unix'],axis=0)
+        return df
+
+# Time and Epoch Conversions
+def datetime2unix(date,time):
+    return datetime.combine(date,time).timestamp()
+def unix2datetime(unix):
+    return datetime.fromtimestamp(unix).strftime("%#m/%d/%y %H:%M")
+
 # Page Config
 st.set_page_config(  # Alternate names: setup_page, page, layout
 	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
@@ -88,28 +110,6 @@ else: # both not None
     if show_sent == "Yes":
         num_twt = st.slider('Number of tweets:', min_value=10, max_value=len(twitter.index))
         st.table(twitter[['date','text','sentiment_score']].iloc[:num_twt].set_index('date').rename(columns={"sentiment_score":"Sentiment Score","text":"Tweet Content"}).sort_values(by='date',axis=0,ascending=False))
-
-# Querying data
-def get_df(name,**kwargs):
-    url = st.secrets['db_url'] % name
-    payload = {'orderBy':'"unix"'}
-    for key, value in kwargs.items():
-        payload[key] = value
-    js = requests.get(url,params=payload).json()
-    if js: # when data is not null
-        if isinstance(js, dict): # when result is dict 
-            df = pd.DataFrame(list(js.values())) 
-        elif isinstance(js, list): # when result is list
-            df = pd.DataFrame(js)
-        df['date'] = df['unix'].apply(unix2datetime)
-        df = df.sort_values(by=['unix'],axis=0)
-        return df
-
-# Time and Epoch Conversions
-def datetime2unix(date,time):
-    return datetime.combine(date,time).timestamp()
-def unix2datetime(unix):
-    return datetime.fromtimestamp(unix).strftime("%#m/%d/%y %H:%M")
 
 
 if __name__=="__main__":
