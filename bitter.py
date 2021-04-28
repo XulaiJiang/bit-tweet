@@ -17,38 +17,31 @@ st.set_page_config(  # Alternate names: setup_page, page, layout
 )
 
 # App title
-def main():
-    st.title("BitCoin Vs. Twitter")
-    st.markdown('''
-    ***Disclaimer***
-    - This is an app demo designed by [Xulai Jiang](https://github.com/XulaiJiang) using Plotly and Streamlit;
-    - Private Information, such as *User_Id* from [twitter.com](https://twitter.com), are filtered;
-    - App is for demonstration purposes only;
-    ''')
-    st.write('---')
-    # Sidebar
-    st.sidebar.subheader('Select Date and Time')
-    start_time = st.sidebar.time_input('Start Time',time(10,00))
-    start_date = st.sidebar.date_input("Start date", date(2021, 3, 14))
-    end_time = st.sidebar.time_input('End Time',time(11,00))
-    end_date = st.sidebar.date_input("End date", date(2021, 3, 14))
-    # Convert time to unix for query
-    start = datetime2unix(start_date,start_time)
-    end = datetime2unix(end_date,end_time)
-    # Retrieve data in range
-    bitcoin = get_df('bitcoin',startAt = str(start), endAt = str(end))
-    twitter = get_df('twitter',startAt = str(start), endAt = str(end))
-    # Show dataframes
-    if (bitcoin is None): # when both are empty
-        st.warning('Please choose a valid time between 3/14/2021 to 3/28/2021.')
-        st.stop()
-    elif (twitter is None): # when tweets are empty
-        show_bitcoin(bitcoin,start_date,start_time,end_date,end_time)
-    else: # both not None
-        show_bitcoin(bitcoin,start_date,start_time,end_date,end_time)
-        show_tweets(twitter,start_date,start_time,end_date,end_time)
-    
-def show_bitcoin(bitcoin,start_date,start_time,end_date,end_time):
+st.title("BitCoin Vs. Twitter")
+st.markdown('''
+***Disclaimer***
+- This is an app demo designed by [Xulai Jiang](https://github.com/XulaiJiang) using Plotly and Streamlit;
+- Private Information, such as *User_Id* from [twitter.com](https://twitter.com), are filtered;
+- App is for demonstration purposes only;
+''')
+st.write('---')
+# Sidebar
+st.sidebar.subheader('Select Date and Time')
+start_time = st.sidebar.time_input('Start Time',time(10,00))
+start_date = st.sidebar.date_input("Start date", date(2021, 3, 14))
+end_time = st.sidebar.time_input('End Time',time(11,00))
+end_date = st.sidebar.date_input("End date", date(2021, 3, 14))
+# Convert time to unix for query
+start = datetime2unix(start_date,start_time)
+end = datetime2unix(end_date,end_time)
+# Retrieve data in range
+bitcoin = get_df('bitcoin',startAt = str(start), endAt = str(end))
+twitter = get_df('twitter',startAt = str(start), endAt = str(end))
+# Show dataframes
+if (bitcoin is None): # when both are empty
+    st.warning('Please choose a valid time between 3/14/2021 to 3/28/2021.')
+    st.stop()
+elif (twitter is None): # when tweets are empty
     # Show bitcoin data
     color = st.color_picker('Choose a Color for Line Plot:', '#00f5f9')
     st.subheader(f'**Bitcoin Price Between {datetime.combine(start_date,start_time).strftime("%#m/%d/%y %H:%M")} and {datetime.combine(end_date,end_time).strftime("%#m/%d/%y %H:%M")}**')
@@ -63,8 +56,21 @@ def show_bitcoin(bitcoin,start_date,start_time,end_date,end_time):
     fig_scat.update_layout(xaxis_rangeslider_visible=False)
     # Show plot(s)
     st.plotly_chart(fig_scat)
-
-def show_tweets(twitter,start_date,start_time,end_date,end_time):
+else: # both not None
+    # Show bitcoin data
+    color = st.color_picker('Choose a Color for Line Plot:', '#00f5f9')
+    st.subheader(f'**Bitcoin Price Between {datetime.combine(start_date,start_time).strftime("%#m/%d/%y %H:%M")} and {datetime.combine(end_date,end_time).strftime("%#m/%d/%y %H:%M")}**')
+    fig_scat = go.Figure([go.Scatter(name='Line Chart',x=bitcoin['date'], y=bitcoin['high'],line=dict(color=color, width=2))])
+    # Show candle plot on top
+    candle = st.checkbox('Show CandleStick Chart')
+    if candle:
+        fig_scat.add_trace(go.Candlestick(name='Candlestick Chart',x=bitcoin['date'],open=bitcoin['open'],high=bitcoin['high'],low=bitcoin['low'],close=bitcoin['close']))
+    # Remove axes
+    fig_scat.update_xaxes(showgrid=False)
+    fig_scat.update_yaxes(showgrid=False)
+    fig_scat.update_layout(xaxis_rangeslider_visible=False)
+    # Show plot(s)
+    st.plotly_chart(fig_scat)
     # Show twitter data
     st.subheader(f'**Sentiment Scores in Tweets**')
     fig_t = px.bar(twitter, x='date', y="sentiment_score", color='sentiment_score')
@@ -76,7 +82,7 @@ def show_tweets(twitter,start_date,start_time,end_date,end_time):
 
 # Querying data
 def get_df(name,**kwargs):
-    url = st.secrets['db_url'] % name
+    url = "https://dsci-551-project-9f773-default-rtdb.firebaseio.com/%s/.json" % name
     payload = {'orderBy':'"unix"'}
     for key, value in kwargs.items():
         payload[key] = value
