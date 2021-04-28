@@ -75,7 +75,6 @@ def show_tweets(twitter,start_date,start_time,end_date,end_time):
         st.table(twitter[['date','text','sentiment_score']].iloc[:num_twt].set_index('date').rename(columns={"sentiment_score":"Sentiment Score","text":"Tweet Content"}).sort_values(by='date',axis=0,ascending=False))
 
 # Querying data
-@st.cache
 def get_df(name,**kwargs):
     url = st.secrets['db_url'] % name
     payload = {'orderBy':'"unix"'}
