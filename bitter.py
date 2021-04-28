@@ -110,7 +110,3 @@ else: # both not None
     if show_sent == "Yes":
         num_twt = st.slider('Number of tweets:', min_value=10, max_value=len(twitter.index))
         st.table(twitter[['date','text','sentiment_score']].iloc[:num_twt].set_index('date').rename(columns={"sentiment_score":"Sentiment Score","text":"Tweet Content"}).sort_values(by='date',axis=0,ascending=False))
-
-
-if __name__=="__main__":
-    main()
