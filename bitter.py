@@ -77,7 +77,7 @@ def show_tweets(twitter,start_date,start_time,end_date,end_time):
 # Querying data
 @st.cache
 def get_df(name,**kwargs):
-    url = "https://dsci-551-project-9f773-default-rtdb.firebaseio.com/%s/.json" % name
+    url = st.secrets['db_url'] % name
     payload = {'orderBy':'"unix"'}
     for key, value in kwargs.items():
         payload[key] = value
